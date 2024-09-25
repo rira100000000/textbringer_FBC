@@ -46,6 +46,18 @@ module Textbringer
       result
     end
 
+    define_command(:eval_buffer_other_window) do
+      buffer = Buffer.current
+      old_stdout = $stdout
+      $stdout = StringIO.new
+      result = eval(buffer.to_s, TOPLEVEL_BINDING,
+                    buffer.file_name || buffer.name, 1)
+      message(result.inspect)
+      Buffer.output.insert($stdout.string)
+      $stdout = old_stdout
+      result
+    end
+    
     define_command(:eval_region) do
       buffer = Buffer.current
       b, e = buffer.point, buffer.mark

@@ -79,6 +79,7 @@ module Textbringer
       @@current = nil
       @@minibuffer = nil
       @@global_mark_ring = nil
+      @@output = nil
     end
 
     def self.auto_detect_encodings
@@ -110,6 +111,10 @@ module Textbringer
       @@current
     end
 
+    def self.output
+      @@output
+    end
+
     def self.current=(buffer)
       if buffer && buffer.name && @@table.key?(buffer.name)
         @@list.delete(buffer)
@@ -120,6 +125,14 @@ module Textbringer
 
     def self.minibuffer
       @@minibuffer ||= Buffer.new(name: "*Minibuffer*")
+    end
+
+    def self.output=(buffer)
+      if buffer && buffer.name && @@table.key?(buffer.name)
+        @@list.delete(buffer)
+        @@list.unshift(buffer)
+      end
+      @@output = buffer
     end
 
     def self.global_mark_ring

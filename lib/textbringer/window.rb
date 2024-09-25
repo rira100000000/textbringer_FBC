@@ -19,6 +19,7 @@ module Textbringer
     @@current = nil
     @@echo_area = nil
     @@has_colors = false
+    @@output = nil
 
     def self.list(include_echo_area: false)
       if include_echo_area
@@ -561,6 +562,30 @@ module Textbringer
       resize(new_lines, columns)
       new_window = Window.new(old_lines - new_lines, columns, y + new_lines, x)
       new_window.buffer = buffer
+      i = @@list.index(self)
+      @@list.insert(i + 1, new_window)
+    end
+
+    def split_output(other_lines = nil)
+      return unless @@output == nil
+
+      old_lines = lines
+      if other_lines
+        if other_lines < CONFIG[:window_min_height]
+          raise EditorError, "Window too small"
+        end
+        new_lines = lines - other_lines
+      else
+        new_lines = (old_lines / 1.5).ceil
+      end
+      if new_lines < CONFIG[:window_min_height]
+        raise EditorError, "Window too small"
+      end
+      resize(new_lines, columns)
+      new_window = Window.new(old_lines - new_lines, columns, y + new_lines, x)
+      Buffer.output = Buffer.new
+      @@output = new_window 
+      new_window.buffer = Buffer.output
       i = @@list.index(self)
       @@list.insert(i + 1, new_window)
     end

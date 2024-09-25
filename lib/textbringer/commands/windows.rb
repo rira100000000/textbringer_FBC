@@ -36,6 +36,11 @@ module Textbringer
       Window.current.split
     end
 
+    define_command(:split_output,
+                    doc: "Split the current window output.") do
+      Window.current.split_output
+    end
+
     define_command(:other_window,
                    doc: "Switch to another window.") do
       Window.other_window
