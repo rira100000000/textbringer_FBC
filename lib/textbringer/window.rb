@@ -48,10 +48,7 @@ module Textbringer
     end
 
     def self.output=(window)
-      @@output.save_point if @@output && !@@output.deleted?
       @@output = window
-      @@output.restore_point
-      Buffer.output = window.buffer
     end
 
     def self.delete_window(target = @@current)
@@ -81,6 +78,9 @@ module Textbringer
       if @@current.echo_area?
         raise EditorError, "Can't expand the echo area to full screen"
       end
+      if @@current.output?
+        raise EditorError, "Can't expand the output window to full screen"
+      end
       @@list.delete_if do |window|
         if window.current? || window.echo_area? || window.output?
           false
@@ -90,7 +90,9 @@ module Textbringer
         end
       end
       @@current.move(0, 0)
-      @@current.resize(Window.lines - Window.output.lines, @@current.columns)
+      reserved_lines = Window.output ? Window.output.lines + 1 : 1
+      @@output.move(Window.lines - reserved_lines, 0) if @@output
+      @@current.resize(Window.lines - reserved_lines, @@current.columns)
     end
 
     def self.other_window
@@ -582,9 +584,9 @@ module Textbringer
     end
 
     def self.open_output_window(other_lines = nil)
-      return unless Window.output == nil
+      raise EditorError, "Output window already exist" unless Window.output == nil
 
-      old_lines = lines
+      old_lines = Window.current.lines
       if other_lines
         if other_lines < CONFIG[:window_min_height]
           raise EditorError, "Window too small"
@@ -596,8 +598,8 @@ module Textbringer
       if new_lines < CONFIG[:window_min_height]
         raise EditorError, "Window too small"
       end
-      Window.current.resize(new_lines, columns)
-      new_window = Window.new(old_lines - new_lines, columns, Window.current.y + new_lines, Window.current.x)
+      Window.current.resize(new_lines, Window.current.columns)
+      new_window = Window.new(old_lines - new_lines, Window.current.columns, Window.current.y + new_lines, Window.current.x)
       Buffer.output = Buffer.new
       @@output = new_window
       new_window.buffer = Buffer.output

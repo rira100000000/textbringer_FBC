@@ -48,6 +48,7 @@ module Textbringer
 
     define_command(:delete_output_window,
                    doc: "Delete output window.") do
+      raise EditorError, "Output window not exist" if Window.output.nil?
       Window.delete_window(Window.output)
       Window.output = nil
     end
