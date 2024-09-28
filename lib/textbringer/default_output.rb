@@ -3,7 +3,11 @@ require "stringio"
 module Textbringer
   class DefaultOutput
     def write(*args)
-      Buffer.current.insert(args.join)
+      if Window.output && !Window.output.deleted?
+        Buffer.output.insert(args.join)
+      else
+        Buffer.current.insert(args.join)
+      end
     end
 
     def flush

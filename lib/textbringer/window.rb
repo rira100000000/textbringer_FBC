@@ -43,6 +43,17 @@ module Textbringer
       Buffer.current = window.buffer
     end
 
+    def self.output
+      @@output
+    end
+
+    def self.output=(window)
+      @@output.save_point if @@output && !@@output.deleted?
+      @@output = window
+      @@output.restore_point
+      Buffer.output = window.buffer
+    end
+
     def self.delete_window(target = @@current)
       if target.echo_area?
         raise EditorError, "Can't delete the echo area"
@@ -71,7 +82,7 @@ module Textbringer
         raise EditorError, "Can't expand the echo area to full screen"
       end
       @@list.delete_if do |window|
-        if window.current? || window.echo_area?
+        if window.current? || window.echo_area? || window.output?
           false
         else
           window.delete
@@ -79,7 +90,7 @@ module Textbringer
         end
       end
       @@current.move(0, 0)
-      @@current.resize(Window.lines - 1, @@current.columns)
+      @@current.resize(Window.lines - Window.output.lines, @@current.columns)
     end
 
     def self.other_window
@@ -290,6 +301,10 @@ module Textbringer
 
     def current?
       self == @@current
+    end
+
+    def output?
+      self == Window.output
     end
 
     def read_event
@@ -566,8 +581,8 @@ module Textbringer
       @@list.insert(i + 1, new_window)
     end
 
-    def split_output(other_lines = nil)
-      return unless @@output == nil
+    def self.open_output_window(other_lines = nil)
+      return unless Window.output == nil
 
       old_lines = lines
       if other_lines
@@ -581,12 +596,12 @@ module Textbringer
       if new_lines < CONFIG[:window_min_height]
         raise EditorError, "Window too small"
       end
-      resize(new_lines, columns)
-      new_window = Window.new(old_lines - new_lines, columns, y + new_lines, x)
+      Window.current.resize(new_lines, columns)
+      new_window = Window.new(old_lines - new_lines, columns, Window.current.y + new_lines, Window.current.x)
       Buffer.output = Buffer.new
-      @@output = new_window 
+      @@output = new_window
       new_window.buffer = Buffer.output
-      i = @@list.index(self)
+      i = @@list.index(Window.current)
       @@list.insert(i + 1, new_window)
     end
 

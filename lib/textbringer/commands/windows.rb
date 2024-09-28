@@ -36,14 +36,20 @@ module Textbringer
       Window.current.split
     end
 
-    define_command(:split_output,
-                    doc: "Split the current window output.") do
-      Window.current.split_output
+    define_command(:open_output_window,
+                    doc: "Open output window.") do
+      Window.open_output_window
     end
 
     define_command(:other_window,
                    doc: "Switch to another window.") do
       Window.other_window
+    end
+
+    define_command(:delete_output_window,
+                   doc: "Delete output window.") do
+      Window.delete_window(Window.output)
+      Window.output = nil
     end
 
     define_command(:enlarge_window, doc: <<~EOD) do
