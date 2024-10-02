@@ -4,7 +4,10 @@ module Textbringer
   class DefaultOutput
     def write(*args)
       if Window.output && !Window.output.deleted?
+        current_window = Window.current
+        Window.current = Window.output
         Buffer.output.insert(args.join)
+        Window.current = current_window
       else
         Buffer.current.insert(args.join)
       end
