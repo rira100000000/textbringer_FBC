@@ -1,4 +1,4 @@
-require_relative "../../test_helper"
+require_relative '../../test_helper'
 
 class TestWindows < Textbringer::TestCase
   def test_resize
@@ -199,6 +199,32 @@ class TestWindows < Textbringer::TestCase
     end
   end
 
+  def test_open_output_window
+    open_output_window
+    assert Window.output
+
+    list = Window.list(include_echo_area: true)
+    assert_equal(3, list.size)
+    default_output = DefaultOutput.new
+    default_output.write('foo')
+    assert_equal('foo', Buffer.output.to_s)
+    assert_equal('', Buffer.current.to_s) 
+  end
+
+  def test_delete_output_window
+    open_output_window
+    assert Window.output
+
+    list = Window.list(include_echo_area: true)
+    assert_equal(3, list.size)
+
+    delete_output_window
+    default_output = DefaultOutput.new
+    default_output.write('foo')
+    assert_equal('foo', Buffer.current.to_s)
+    assert_nil(Window.output)
+  end
+
   def test_other_window
     window = Window.current
 
@@ -374,12 +400,12 @@ class TestWindows < Textbringer::TestCase
   end
 
   def test_shrink_window_if_larger_than_buffer
-    insert(<<EOF)
-foo
-bar
-baz
-quux
-EOF
+    insert(<<~EOF)
+      foo
+      bar
+      baz
+      quux
+    EOF
     split_window
     shrink_window_if_larger_than_buffer
     list = Window.list(include_echo_area: true)
@@ -404,27 +430,27 @@ EOF
   end
 
   def test_switch_to_buffer
-    foo = Buffer.new_buffer("foo")
-    bar = Buffer.new_buffer("bar")
+    foo = Buffer.new_buffer('foo')
+    bar = Buffer.new_buffer('bar')
     switch_to_buffer(foo)
     assert_equal(foo, Buffer.current)
     assert_equal(foo, Window.current.buffer)
-    switch_to_buffer("bar")
+    switch_to_buffer('bar')
     assert_equal(bar, Buffer.current)
     assert_equal(bar, Window.current.buffer)
-    
+
     assert_raise(EditorError) do
-      switch_to_buffer("baz")
+      switch_to_buffer('baz')
     end
-    switch_to_buffer("baz", true)
-    assert_equal("baz", Buffer.current.name)
+    switch_to_buffer('baz', true)
+    assert_equal('baz', Buffer.current.name)
   end
 
   def test_list_buffers
-    Buffer.new_buffer("foo")
-    Buffer.new_buffer("bar")
+    Buffer.new_buffer('foo')
+    Buffer.new_buffer('bar')
     list_buffers
-    assert_equal("*Buffer List*", Buffer.current.name)
+    assert_equal('*Buffer List*', Buffer.current.name)
     assert_equal(<<~EOF.chomp, Buffer.current.to_s)
       *scratch*
       foo
@@ -433,14 +459,14 @@ EOF
   end
 
   def test_bury_buffer
-    scratch = Buffer["*scratch*"]
+    scratch = Buffer['*scratch*']
     bury_buffer
     assert_equal([scratch], Buffer.list)
     assert_equal(scratch, Buffer.current)
     assert_equal(scratch, Window.current.buffer)
-    foo = Buffer.new_buffer("foo")
-    bar = Buffer.new_buffer("bar")
-    baz = Buffer.new_buffer("baz")
+    foo = Buffer.new_buffer('foo')
+    bar = Buffer.new_buffer('bar')
+    baz = Buffer.new_buffer('baz')
     assert_equal([scratch, foo, bar, baz], Buffer.list)
     assert_equal(scratch, Buffer.current)
     assert_equal(scratch, Window.current.buffer)
@@ -459,20 +485,20 @@ EOF
   end
 
   def test_kill_buffer
-    foo = Buffer.new_buffer("foo")
+    foo = Buffer.new_buffer('foo')
     switch_to_buffer(foo)
-    insert("foo")
+    insert('foo')
     split_window
 
     push_keys("no\n")
-    kill_buffer("foo")
+    kill_buffer('foo')
     assert_equal(foo, Buffer.current)
-    assert_equal(foo, Buffer["foo"])
+    assert_equal(foo, Buffer['foo'])
 
     push_keys("yes\n")
     kill_buffer(foo)
     assert_not_equal(foo, Buffer.current)
-    assert_equal(nil, Buffer["foo"])
+    assert_equal(nil, Buffer['foo'])
     Window.list(include_echo_area: true).each do |window|
       assert_not_equal(foo, window.buffer)
     end
@@ -481,6 +507,6 @@ EOF
     buffers.each do |buffer|
       kill_buffer(buffer)
     end
-    assert_equal("*scratch*", Buffer.current.name)
+    assert_equal('*scratch*', Buffer.current.name)
   end
 end
