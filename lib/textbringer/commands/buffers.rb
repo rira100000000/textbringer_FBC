@@ -261,8 +261,20 @@ module Textbringer
 
       buffer = Buffer.current
       s = buffer.point
-      e = buffer.re_search_forward(Regexp.quote(char), count: count)
+      e = buffer.re_search_forward(/(\p{Letter}|\p{Number})+/, count: count)
       buffer.kill_region(s, e)
+    end
+
+    define_command(:upcase_word,
+                   doc: <<~EOD) do
+        Kill up to and including count-th occurrence of char.
+      EOD
+      |count: number_prefix_arg|
+
+      buffer = Buffer.current
+      s = buffer.point
+      e = buffer.re_search_forward(/(\p{Letter}|\p{Number})+/, count: count)
+      buffer.replace(buffer.substring(s,e).upcase, start: s, end: e)
     end
   end
 end
