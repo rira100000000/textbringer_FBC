@@ -273,8 +273,19 @@ module Textbringer
 
       buffer = Buffer.current
       s = buffer.point
-      e = buffer.re_search_forward(/(\p{Letter}|\p{Number})+/, count: count)
-      buffer.replace(buffer.substring(s,e).upcase, start: s, end: e)
+      if count >= 0
+        e = buffer.re_search_forward(/(\p{Letter}|\p{Number})+/, count: count)
+      else
+        buffer.backward_word(-count)
+        e = buffer.point
+        s, e = Buffer.region_boundaries(s, e)
+      end
+      buffer.replace(buffer.substring(s, e).upcase, start: s, end: e)
     end
   end
 end
+
+__END__
+aaa bbb ccc
+       ↑ 最初はここにカーソルを置く → Buffer.current.point は ?
+upcase_word(count: -1)
