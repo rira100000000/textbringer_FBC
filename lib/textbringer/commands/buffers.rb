@@ -272,20 +272,27 @@ module Textbringer
       |count: number_prefix_arg|
 
       buffer = Buffer.current
-      s = buffer.point
-      if count >= 0
-        e = buffer.re_search_forward(/(\p{Letter}|\p{Number})+/, count: count)
-      else
-        buffer.backward_word(-count)
-        e = buffer.point
-        s, e = Buffer.region_boundaries(s, e)
-      end
-      buffer.replace(buffer.substring(s, e).upcase, start: s, end: e)
+      buffer.word_edit(count: count){|x| x.upcase }
+    end
+
+    define_command(:downcase_word,
+                    doc: <<~EOD) do
+        Kill up to and including count-th occurrence of char.
+      EOD
+      |count: number_prefix_arg|
+
+      buffer = Buffer.current
+      buffer.word_edit(count: count){|x| x.downcase }
+    end
+
+    define_command(:capitalize_word,
+                    doc: <<~EOD) do
+      Kill up to and including count-th occurrence of char.
+      EOD
+      |count: number_prefix_arg|
+
+      buffer = Buffer.current
+      buffer.word_edit(count: count){|x| x.capitalize }
     end
   end
 end
-
-__END__
-aaa bbb ccc
-       ↑ 最初はここにカーソルを置く → Buffer.current.point は ?
-upcase_word(count: -1)

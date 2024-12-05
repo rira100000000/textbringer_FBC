@@ -1040,6 +1040,34 @@ module Textbringer
       end
     end
 
+    def word_edit(count: 1)
+      # countの数を正負で分ける
+      abs = count.abs
+      first_s = point
+
+      # 正だったら ここ以下をループ
+      if count >= 0
+        abs.times do
+          forward_word
+          backward_word
+          s = point
+          e = re_search_forward(/(\p{Letter}|\p{Number})+/, count: 1)
+          replace(yield(substring(s, e).strip), start: s, end: e)
+        end
+      else
+      # 負だったら ここ以下をループ
+        abs.times do |i|
+          backward_word(i)
+          s = point
+          backward_word(1)
+          e = point
+          s, e = Buffer.region_boundaries(s, e)
+          replace(yield(substring(s, e)), start: s, end: e)
+        end
+        @point = first_s
+      end
+    end
+
     def insert_for_yank(s)
       if @mark.nil? || !point_at_mark?(@mark)
         push_mark
