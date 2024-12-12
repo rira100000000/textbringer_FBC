@@ -261,38 +261,38 @@ module Textbringer
 
       buffer = Buffer.current
       s = buffer.point
-      e = buffer.re_search_forward(/(\p{Letter}|\p{Number})+/, count: count)
+      e = buffer.re_search_forward(Regexp.quote(char), count: count)
       buffer.kill_region(s, e)
     end
 
     define_command(:upcase_word,
                    doc: <<~EOD) do
-        Kill up to and including count-th occurrence of char.
+        Convert to upper case from point to end of word, moving over.
       EOD
       |count: number_prefix_arg|
 
       buffer = Buffer.current
-      buffer.word_edit(count: count){|x| x.upcase }
+      buffer.convert_word(count: count){|x| x.upcase }
     end
 
     define_command(:downcase_word,
                     doc: <<~EOD) do
-        Kill up to and including count-th occurrence of char.
+        Convert to lower case from point to end of word, moving over.
       EOD
       |count: number_prefix_arg|
 
       buffer = Buffer.current
-      buffer.word_edit(count: count){|x| x.downcase }
+      buffer.convert_word(count: count){|x| x.downcase }
     end
 
     define_command(:capitalize_word,
                     doc: <<~EOD) do
-      Kill up to and including count-th occurrence of char.
+        Capitalize from point to the end of word, moving over.
       EOD
       |count: number_prefix_arg|
 
       buffer = Buffer.current
-      buffer.word_edit(count: count){|x| x.capitalize }
+      buffer.convert_word(count: count){|x| x.capitalize }
     end
   end
 end

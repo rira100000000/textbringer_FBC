@@ -1553,7 +1553,7 @@ EOF
     assert_equal(0, buffer.point_min)
     assert_equal(18, buffer.point_max)
   end
-  
+
   def test_goto_char
     buffer = Buffer.new
     buffer.insert("fooあいうえお")
@@ -1971,4 +1971,64 @@ EOF
     assert_equal(true, buffer.looking_at?(/.*/))
     assert_equal("baz", buffer.match_string(0))
   end
+
+  def test_convert_word
+    buffer_a = Buffer.new(" aaa")
+    buffer_a.convert_word(count: 1 ){|x| x.upcase}
+    assert_equal(" AAA", buffer_a.to_s)
+    assert_equal(4, buffer_a.point)
+
+    buffer_b = Buffer.new("bbb ")
+    buffer_b.forward_char(4)
+    buffer_b.convert_word(count: -1 ){|x| x.upcase}
+    assert_equal("BBB ", buffer_b.to_s)
+    assert_equal(4, buffer_b.point)
+
+    buffer_c = Buffer.new(" ccc")
+    buffer_c.convert_word(count: 1){|x| x.capitalize}
+    assert_equal(" Ccc", buffer_c.to_s)
+    assert_equal(4, buffer_c.point)
+
+    buffer_d = Buffer.new("ddd ")
+    buffer_d.forward_char(4)
+    buffer_d.convert_word(count: -1){|x| x.capitalize}
+    assert_equal("Ddd ", buffer_d.to_s)
+    assert_equal(4, buffer_d.point)
+
+    buffer_aa = Buffer.new(" aaa aaa aaa")
+    buffer_aa.convert_word(count: 2 ){|x| x.upcase}
+    assert_equal(" AAA AAA aaa", buffer_aa.to_s)
+    assert_equal(8, buffer_aa.point)
+
+    buffer_bb = Buffer.new("bbb bbb bbb ")
+    buffer_bb.forward_char(12)
+    buffer_bb.convert_word(count: -2 ){|x| x.upcase}
+    assert_equal("bbb BBB BBB ", buffer_bb.to_s)
+    assert_equal(12, buffer_bb.point)
+
+    buffer_cc = Buffer.new(" ccc ccc ccc")
+    buffer_cc.convert_word(count: 2){|x| x.capitalize}
+    assert_equal(" Ccc Ccc ccc", buffer_cc.to_s)
+    assert_equal(8, buffer_cc.point)
+
+    buffer_dd = Buffer.new("ddd ddd ddd ")
+    buffer_dd.forward_char(12)
+    buffer_dd.convert_word(count: -2){|x| x.capitalize}
+    assert_equal("ddd Ddd Ddd ", buffer_dd.to_s)
+    assert_equal(12, buffer_dd.point)
+  end
 end
+__END__
+
+ aaa aaa
+        ↑
+012345678
+
+前方向に空白がある
+"aaa  S  bbbP "
+
+後ろ方向に空白がある
+"aaa  SP  bbb "
+
+
+buffer_b.instance_variable_set("@point", 4)

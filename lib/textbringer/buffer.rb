@@ -1040,7 +1040,7 @@ module Textbringer
       end
     end
 
-    def word_edit(count: 1)
+    def convert_word(count: 1)
       # countの数を正負で分ける
       abs = count.abs
       first_s = point
