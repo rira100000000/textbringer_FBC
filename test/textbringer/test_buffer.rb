@@ -2018,17 +2018,3 @@ EOF
     assert_equal(12, buffer_dd.point)
   end
 end
-__END__
-
- aaa aaa
-        ↑
-012345678
-
-前方向に空白がある
-"aaa  S  bbbP "
-
-後ろ方向に空白がある
-"aaa  SP  bbb "
-
-
-buffer_b.instance_variable_set("@point", 4)
